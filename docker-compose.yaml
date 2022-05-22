@@ -1,0 +1,54 @@
+# version of this file
+version: '3.0' 
+# service that I am using
+services:
+  mysql:
+    # image used to run the container
+    image: mysql:5.7
+    # name of the container
+    container_name: mysql
+    # environment variables
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=wp_db
+      - MYSQL_USER=wp_user
+      - MYSQL_PASSWORD=12345
+    # volumes to mount to the container
+    volumes:
+      - "mysql:/var/lib/mysql"
+    # restart the container if it exits
+    restart: always
+  wordpress:
+      # run the container only if the mysql container is running
+      depends_on:
+        - mysql
+      image: wordpress:latest
+      restart: always
+      ports:
+        - "8080:80"
+      environment:
+          # link the container to the mysql container
+        - WORDPRESS_DB_HOST=mysql:3306
+          # wordpress database user
+        - WORDPRESS_DB_USER=wp-user
+          # wordpress database password
+        - WORDPRESS_DB_PASSWORD=12345
+          # wordpress database name
+        - WORDPRESS_DB_NAME=wp_db
+      volumes:
+        # mount the wordpress directory to the container - "wordpress:/var/www/html"
+        ["./:/var/www/html"]
+        # 
+  phpmyadmin:
+    depends_on:
+    - mysql
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_ROOT_PASSWORD: 12345
+  # top level volume
+volumes:
+    mysql: {}
